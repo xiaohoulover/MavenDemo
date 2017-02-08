@@ -8,5 +8,85 @@
         http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
 
-
+	<!-- 加载配置文件，方便多环境不同JDBC连接参数切换连接 -->
+	<context:property-placeholder location="classpath:jdbc.properties" />
+	
+	<!-- 
+		<context:annotation-config/>作用是向Spring容器注册以下四个BeanPostProcessor:
+			AutowiredAnnotationBeanPostProcessor、CommonAnnotationBeanPostProcessor
+			PersistenceAnnotationBeanPostProcessor 、RequiredAnnotationBeanPostProcessor。
+		注册四个注解的作用是为了识别相应的注解
+	 -->
+	<context:annotation-config />
+	
+	<!-- 自动扫描包 -->
+	<context:component-scan base-package="com.xiaohou.model.*" />
+	
+	<!--Tomcat+SpringFramework开发 使用 JNDI连接配置 -->
+	<!-- 
+		1.在Tomcat的config/context.xml文件中配置：
+			<Context>   
+			    <Resource name="jdbc/demoDB" auth="Container"   
+			    type="javax.sql.DataSource"  
+			    driverClassName="com.mysql.jdbc.Driver"  
+			    url="jdbc:mysql://localhost:3306/demo"  
+			    username="root"  
+			    password="123"  
+			    maxActive="50"  
+			    maxIdle="30"  
+			    maxWait="10000" />  
+			</Context>
+		2.在Spring文件中配置如下：
+	 -->
+	 <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+	 	<property name="jndiName" value="${db.jndiName}"></property>
+	 </bean>
+	 
+	 <!-- 添加Spring进行事务管理 -->
+	 <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource" />
+     </bean>
+     <!-- 支持事务注解， 指定使用哪个事务管理器 -->
+     <tx:annotation-driven transaction-manager="transactionManager" />
+	
+	 <!-- Spring + Mybatis 配置SessionFactory -->
+	 <!--  SqlSessionFactoryBean 实现了 Spring 的 FactoryBean 接口 -->
+	 <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <!-- 指定Mybatis的XML配置文件路径
+        <property name="configLocation"></property>
+         -->
+        <!-- 指定MyBatis XML映射器文件的位置 -->
+        <!-- sqlSessionFactory创建 SqlSession. -->
+        <!-- sqlSessionFactory会加载在该路径下的所有的MyBatis映射器XML文件并解析 -->
+        <property name="mapperLocations" value="classpath*:/**/*Mapper.xml" />
+        <!-- 配置MyBatis拦截器。(拦截器配置的顺序会影响其执行顺序) -->
+        <!-- 注：从上->下：第一个拦截器最后执行，最先返回；最后一个拦截器最先执行，但最后返回 -->
+        <property name="plugins">
+            <array>
+                <!-- 分页插件 -->
+                <bean class="com.github.pagehelper.PageHelper" />
+                <!-- 可自定义实现Interceptor... -->
+            </array>
+        </property>
+     </bean>
+     
+     <!--  bean 可以通过一个线程安全的 SqlSession 来注入,基于 Spring 的事务配置 来自动提交,回滚,关闭 session。 -->
+     <!--
+     	1.SqlSessionTemplate管理MyBatis的SqlSession. 
+     	   调用 MyBatis 的 SQL 方法, 翻译异常。
+     	2.SqlSessionTemplate 是线程安全的, 可以被多个 DAO 所共享使用
+     	3.管理 session 的生命 周期,包含必要的关闭,提交或回滚操作
+     	4.持久化模板可以参与到 Spring 的事务中并且被多个注入的映射器类所使 用时也是线程安全的
+     -->
+     <bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+        <constructor-arg index="0" name="sqlSessionFactory" ref="sqlSessionFactory" />
+     </bean>
+     
+     <!-- MapperScannerConfigurer查找类路径下的映射器并自动创建MapperFactoryBean -->
+     <!-- 自动扫描指定包，将Mapper接口生成代理注入到Spring中 -->
+     <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="**.*.mapper" />
+     </bean>
+	
 </beans>
