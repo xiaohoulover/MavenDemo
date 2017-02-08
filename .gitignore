@@ -1,2 +1,12 @@
 /target/
-/target/
+/.settings/
+.classpath
+.project
+*.class
+/bin/
+.checkstyle/dsis/
+.idea/
+.metadata/
+.checkstyle
+*.iml
+/common/
