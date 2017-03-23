@@ -38,8 +38,8 @@
 			</Context>
 		2.在Spring文件中配置如下：
 	 -->
-	 <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-	 	 <property name="driver" value="${test.driver}"></property>
+	 <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+	 	 <property name="driverClassName" value="${test.driver}"></property>
 		 <property name="url" value="${test.url}"></property>
 		 <property name="username" value="${test.username}"></property>
 		 <property name="password" value="${test.password}"></property>
