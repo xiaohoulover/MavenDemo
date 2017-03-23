@@ -39,7 +39,10 @@
 		2.在Spring文件中配置如下：
 	 -->
 	 <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-	 	<property name="url" value="${db.url}"></property>
+	 	 <property name="driver" value="${test.driver}"></property>
+		 <property name="url" value="${test.url}"></property>
+		 <property name="username" value="${test.username}"></property>
+		 <property name="password" value="${test.password}"></property>
 	 </bean>
 	 
 	 <!-- 添加Spring进行事务管理 -->
