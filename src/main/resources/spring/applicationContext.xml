@@ -39,7 +39,7 @@
 		2.在Spring文件中配置如下：
 	 -->
 	 <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-	 	<property name="jndiName" value="${db.jndiName}"></property>
+	 	<property name="url" value="${db.url}"></property>
 	 </bean>
 	 
 	 <!-- 添加Spring进行事务管理 -->
